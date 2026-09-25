@@ -10,7 +10,7 @@
  * - AVWAP is cumulative from anchor point, persists across days
  */
 
-export default function ({ registerIndicator, sourceValues }) {
+export default function ({ registerIndicator, sourceValues, DEFAULT_TIMEZONE }) {
   registerIndicator({
     id: 'avwap',
     name: 'Anchored VWAP',
@@ -18,8 +18,8 @@ export default function ({ registerIndicator, sourceValues }) {
     placement: 'onchart',
     inputs: [
       { key: 'anchorIndex', type: 'number', label: 'Anchor Candle Index', default: 0, min: 0 },
-      { key: 'anchorTime', type: 'string', label: 'Anchor Time (ISO)', default: '' },
-      { key: 'source', type: 'string', label: 'Price Source', default: 'hlc3', options: ['hlc3', 'hl2', 'ohlc4', 'close'] }
+      { key: 'anchorTime', type: 'text', label: 'Anchor Time (ISO)', default: '' },
+      { key: 'source', type: 'string', label: 'Price Source', default: 'hlc3' }
     ],
     plots: [
       { key: 'avwap', type: 'line', title: 'AVWAP', style: { color: '#4f8cff', lineWidth: 2 } },
@@ -28,7 +28,7 @@ export default function ({ registerIndicator, sourceValues }) {
     calc(bars, settings) {
       // Import the AVWAP calculation logic
       // We'll use a simple implementation here
-      const length = Number(settings.anchorIndex) || 0;
+      const anchorIndex = Number(settings.anchorIndex) || 0;
       const anchorTime = settings.anchorTime || '';
       const src = sourceValues(bars, settings.source);
       
@@ -41,8 +41,8 @@ export default function ({ registerIndicator, sourceValues }) {
         // Find first candle at or after anchor time
         // This requires timestamp data - for now use index 0
         startIdx = 0;
-      } else if (length > 0) {
-        startIdx = length;
+      } else if (anchorIndex > 0) {
+        startIdx = anchorIndex;
       }
       
       // Calculate cumulative VWAP from anchor point
